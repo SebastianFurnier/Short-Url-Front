@@ -1,52 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Url Shortener</title>
-    <link rel="stylesheet" href="main.css">
-</head>
-<body>
-    <img src="" alt="Logo">
-    <br>
-    <form id="shortenerForm" method="post">
-        <p>Insert your URL</p>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Url Shortener</title>
+        <link rel="stylesheet" href="main.css">
+    </head>
+    <body>
+        <img src="" alt="Logo">
         <br>
-        <input type="text" id="url_input" name="url_input">
-        <br>
-        <input type="submit" value="Shorten" id="short_button">
-    </form>
+        <form id="shortenerForm" method="post">
+            <p>Insert your URL</p>
+            <br>
+            <input type="text" id="url_input" name="url_input">
+            <br>
+            <input type="submit" value="Shorten" id="short_button">
+        </form>
 
-    <div id="resultContainer" style="display:none;">
-        <p>Shortened URL: <span id="shortenedUrl"></span></p>
-    </div>
+        <div id="resultContainer" style="display:none;">
+            <p>Shortened URL: <span id="shortenedUrl"></span></p>
+        </div>
 
-    <script>
-        document.getElementById("shortenerForm").addEventListener("submit", function(event) {
-            event.preventDefault();
+        <script>
+            const pathname = window.location.pathname;
+            const id = pathname.split('/')[1];
 
-            const url = document.getElementById("url_input").value;
-            const data = { url: url };
+            if (id) {
+                fetch(`https://linkshortener-production-97d2.up.railway.app/${id}`)
+                    .then(response => response.json())
+                    .then(result => {
+                        console.log("Respuesta del servidor:", result);
+                        document.getElementById("resultContainer").style.display = "block";
+                        document.getElementById("shortenedUrl").textContent = result.shortenedUrl;
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("Ocurrió un error al obtener el enlace.");
+                    });
+            }
 
-            fetch("https://linkshortener-production-97d2.up.railway.app/shortener", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log("Respuesta del servidor:", result);
+            document.getElementById("shortenerForm").addEventListener("submit", function(event) {
+                event.preventDefault();
 
-                document.getElementById("resultContainer").style.display = "block";
-                document.getElementById("shortenedUrl").textContent = result.shortenedUrl;
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("Ocurrió un error al acortar el link.");
+                const url = document.getElementById("url_input").value;
+                const data = { url: url };
+
+                fetch("https://linkshortener-production-97d2.up.railway.app/shortener", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    console.log("Respuesta del servidor:", result);
+
+                    document.getElementById("resultContainer").style.display = "block";
+                    document.getElementById("shortenedUrl").textContent = result.shortenedUrl;
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Ocurrió un error al acortar el link.");
+                });
             });
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>
